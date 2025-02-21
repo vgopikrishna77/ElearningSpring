@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard with Sidebar</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: white;
+            padding: 15px;
+            display: block;
+            font-size: 18px;
+        }
+
+        .sidebar a:hover {
+            background-color: #34495e;
+        }
+
+        /* .sidebar .dropdown-toggle::after {
+            content: " ▼";
+        } */
+
+        .sidebar .dropdown-item {
+            background-color: #34495e;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            width: 100%;
+        }
+        table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h3 class="text-center text-white">Admin Dashboard</h3>
+
+        <!-- Employee Section -->
+        <div class="dropdown">
+            <a class="dropdown-toggle" href="#"  data-toggle="dropdown" >Employee</a>
+            <div class="dropdown-menu" >
+                <a class="dropdown-item" href="#" (click)="viewEmployee(emp)">View Employee</a>
+
+            </div>
+        </div>
+
+
+        <!-- Manager Section -->
+        <div class="dropdown">
+            <a class="dropdown-toggle" href="#"  data-toggle="dropdown">Manager</a>
+            <div class="dropdown-menu" >
+                <a class="dropdown-item" href="#"  (click)="viewManager()">View Manager</a>
+
+            </div>
+        </div>
+
+        <!-- Instructor Section -->
+        <div class="dropdown">
+            <a class="dropdown-toggle" href="#" id="instructorDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Instructor</a>
+            <div class="dropdown-menu" aria-labelledby="instructorDropdown">
+                <a class="dropdown-item" href="#" (click)="viewInstructor()">View Instructor</a>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Dashboard</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <button  type="button" class="btn btn-primary">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <h2>Dashboard Content</h2>
+        <p>Welcome to the Admin Dashboard. You can manage employees, managers, and instructors from the sidebar.</p>
+        <div class="container" id="section" *ngIf="showEmployeeTable">
+            <table class="table table-hover" >
+                <tr >
+                    <th>Employee Id</th>
+                    <th>Employee Name</th>
+                    <th>Employee Contact</th>
+                    <th colspan="2">Actions</th>
+                </tr>
+                <tr *ngFor="let e of emp">
+                    <td>{{e.empId}}</td>
+                    <td>{{e.empName}}</td>
+                    <td>{{e.employeeContact}}</td>
+                    <td><button type="button" class="btn btn-success bg-success" (click)="viewModelForm()">View</button></td>
+                    <td><button type="button" class="btn btn-primary bg-primary">delete</button></td>
+                </tr>
+
+            </table>
+        </div>
+
+        <div class="container" id="section" *ngIf="showManagerTable">
+            <table class="table table-bordered" >
+                <tr >
+                    <th>Manager Id</th>
+                    <th>Manager Name</th>
+                    <th>Manager Contact</th>
+                    <th colspan="2">Actions</th>
+                </tr>
+                <tr>
+                    <td>{{ manager.managerId}}</td>
+                    <td>{{ manager.managername}}</td>
+                    <td>{{ manager. managerContact}}</td>
+                    <td><button type="button" class="btn btn-success bg-success">View</button></td>
+                    <td><button type="button" class="btn btn-primary bg-primary">delete</button></td>
+                </tr>
+
+            </table>
+        </div>
+
+
+        <div class="container" id="section" *ngIf="showInstructorTable">
+            <table class="table table-hover" >
+                <tr >
+                    <th>Instructor Id</th>
+                    <th>Instructor Name</th>
+                    <th>Instructor Contact</th>
+                    <th colspan="2">Actions</th>
+                </tr>
+                <tr>
+                    <td>{{ instructor.instructorId}}</td>
+                    <td>{{ instructor.instructorname}}</td>
+                    <td>{{ instructor. instructorContact}}</td>
+                    <td><button type="button" class="btn btn-success bg-success">View</button></td>
+                    <td><button type="button" class="btn btn-primary bg-primary">delete</button></td>
+                </tr>
+
+            </table>
+        </div>
+
+        <div class="modal" [ngClass]="{'is-visible': isModalVisible}">
+            <div class="modal-content">
+                <span class="close" (click)="closeModal()">&times;</span>
+                <h2>Edit Employee Details</h2>
+                <form #employeeForm="ngForm">
+                    <div>
+                        <label>Employee Id:</label>
+                        <input name="empId" [(ngModel)]="selectedEmployee.empId" required />
+                    </div>
+                    <div>
+                        <label>Employee Name:</label>
+                        <input name="empName" [(ngModel)]="selectedEmployee.empName" required />
+                    </div>
+                    <div>
+                        <label>Employee Contact:</label>
+                        <input name="employeeContact" [(ngModel)]="selectedEmployee.employeeContact" required />
+                    </div>
+                    <div>
+                        <button type="button" (click)="saveEmployee()">Save</button>
+                        <button type="button" (click)="closeModal()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+<!-- <div class=".container-fluid">
+    <nav class="navbar navbar-expand-sm  mt-5">
+        <div class="collapse navbar-collapse">
+            <div class="ml-auto">
+                <button type="button" class="btn mr-5 custom-button" (click)="navigateToSignUp()">Sign Up</button>
+                <button type="button" class="btn mr-5 custom-button" (click)="navigateToSignIn()">Sign In</button>
+            </div>
+        </div>
+    </nav> -->
+
+      <div class="container-fluid">
+        <nav class="navbar navbar-expand-sm mt-3" style="background-color: #77bce5;">
+            <button type="button" class="btn font-weight-bold ml-5" >Home</button>
+            <button type="button" class="btn font-weight-bold  ml-5">Team</button>
+            <button type="button" class="btn font-weight-bold  ml-5">Contact</button>
+
+
+          <div class="collapse navbar-collapse">
+            <div class="ml-auto">
+              <button type="button" class="btn font-weight-bold mr-5" (click)="navigateToSignUp()">Sign Up</button>
+              <button type="button" class="btn font-weight-bold mr-5" (click)="navigateToSignIn()">Sign In</button>
+            </div>
+          </div>
+        </nav>
+
+
+
+    <div class="row mt-4">
+        <div class="col-md-4 d-flex flex-column  align-items-center c ">
+                        <h1>E-Learning</h1>
+                        <h3>Improve your skill</h3><br>
+                        <p class="font-weight-light ">
+                            Our eLearning platform is designed to empower employees with<br> 
+                            the skills and knowledge they need to excel in their roles.<br>
+                            We offer a variety of interactive and engaging learning modules <br>
+                            tailored to meet the diverse needs of our workforce.</p><br><br>
+                            <a href="#content">
+                            <button type="button" class="btnn btn-info rounded-pill btn-lg " style="border-radius: 25px;"  >Learn More</button>
+                        </a>
+
+                </div>
+        <div class="col-md-8">
+
+            <img src="..\assets\homeimage.png"   alt="Home" style="width:97%; margin-left:9%;">
+    </div>
+
+    <div class="container-fluid">
+        <div class="row " style="background-color: #12102d36; margin-top: 60px;">
+            <h2 class="mt-5" style="text-align: center;">Invest in your career</h2>
+            <div class="col-md-4">
+                <div style="text-align: center; font-size: 2rem;">&#xe211;</div>
+
+                <h4 class="mt-3" style="text-align: center">Explore new skills</h4>
+                <pre style="text-align: center;  font-size: 1rem;">Access 10,000+ courses in AI, business, technology, and more.</pre>
+            </div>
+            <div class="col-md-4">
+                <div style="text-align: center; font-size: 2rem;">&#xe081;</div>
+                <h4 class="mt-3" style="text-align: center"> Earn valuable certifications</h4>
+                <p style="text-align: center;  font-size: 1rem;">
+                    Get certificates for every course you finish and boost your
+                    chances of getting hired after your trial ends at no 
+                    additional cost.</p>
+            </div>
+            <div class="col-md-4">
+                <div style="text-align: center; font-size: 2rem;">&#9733;</div>
+                <h4 class="mt-3" style="text-align: center">Learn from the best</h4>
+                <p style="text-align: center;  font-size: 1rem;">
+                    Take your skills to the next level with expert-led courses
+                    and Coursera Coach, your AI-powered guide.</p>
+            </div>
+        </div>
+
+   
+    <div class="container-fluid">
+        <div class="row" style="background-color:white;">
+            <div class="col-md-6 d-flex flex-column  align-items-center justify-content-center k ">
+                <h2 style="margin-left: 18%; line-height: 1.5; ">
+                    Learners report career benefits, like landing a new job, earning a promotion, gaining applicable skills, and more.</h2>
+                    <button type="button" class="btnn btn-info rounded-pill btn-lg mr-5" style="width: 20%; border-radius: 25px;" >Start Course</button>
+            </div>
+            <div class="col-md-6 mt-5">
+                <img src="..\assets\sideimage.png"  class="img-thumbnail float-right mr-5" alt="Cinque Terre" width="500" height="236" style="position: relative;
+    right: 100px;">
+
+    </div>
+    
+    </div>
+    </div>
+    <div class="container-fluid mt-5">
+        <h2 style="text-align: center;">About</h2>
+        <p id="content" style="text-align: justify; max-width: 80%; margin: 0 auto; font-size: 1rem; word-wrap: break-word; margin-bottom: 40px;">
+            In today’s fast-paced business world, continuous learning is essential for maintaining a competitive edge. Our Employee eLearning platform is specifically
+            designed to help your team acquire the skills, knowledge, and confidence needed to excel in their roles. Whether your employees are looking to refine technical
+            skills, enhance leadership capabilities, or stay ahead of industry trends, our platform offers a rich variety of learning resources tailored to meet their unique needs.<br>
+            <strong>Customizable Learning Paths:</strong> Build personalized training journeys for employees based on their role,
+            experience, and learning preferences, ensuring that they get the most relevant content.<br>
+            <strong>Engaging, Interactive Content: </strong> Our courses combine video tutorials, quizzes, discussions to foster an engaging and dynamic learning experience.<br>
+            <strong>Certifications & Rewards: </strong> Upon completion, employees can earn certificates to showcase their newly acquired skills and milestones, boosting motivation and engagement.
+        </p>
+    </div>
+
+</div>
+<!-- Footer Section -->
+<footer style="background-color:#12102d36; color:black; text-align: center;padding: 5px;">
+    <div class="mt-5">
+        <a href="#" style="color: black; margin: 0 10px; text-decoration: none;">Privacy Policy</a>
+        <a href="#" style="color: black; margin: 0 10px; text-decoration: none;">Terms of Service</a>
+        <a href="#" style="color:black; margin: 0 10px; text-decoration: none;">Contact</a>
+    </div>
+    <p>&copy; 2025 E-Learning Platform. All Rights Reserved.</p>
+</footer>
+
+
+
+===================================
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Dashboard</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      background-color: #f4f4f4;
+    }
+
+    /* Sidebar Styling */
+    .sidebar {
+      width: 250px;
+      background-color: #2c3e50;
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      padding-top: 20px;
+    }
+
+    .sidebar a {
+      text-decoration: none;
+      color: white;
+      padding: 15px;
+      display: block;
+      font-size: 18px;
+    }
+
+    .sidebar a:hover {
+      background-color: #34495e;
+    }
+
+    .sidebar .dropdown-item {
+      background-color: #34495e;
+    }
+
+    .content {
+      margin-left: 250px;
+      padding: 20px;
+      width: 100%;
+    }
+
+    .dropdown-toggle::after {
+      content: "";
+    }
+
+    .btn-apply {
+      margin-top: 15px;
+    }
+    .search-bar {
+  margin-bottom: 20px;
+  display: flex;
+  margin-left: 200px;
+  /* justify-content: end;  */
+}
+
+.search-bar input {
+  width: 700px; 
+  max-width: 100%; 
+  padding: 10px; 
+
+  border: 1px solid #ccc; /* Border color */
+
+}
+
+.search-bar input::placeholder {
+  color: #aaa;
+}
+
+    .dropdown-menu label {
+      cursor: pointer;
+    }
+
+    .card {
+      margin-bottom: 20px;
+    }
+    .nav-item{
+        margin-left: 30px;
+
+
+
+    }
+    /* .navbar{
+        background-color: gray;
+    }
+     */
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3 class="text-center text-white">Employee Dashboard</h3>
+
+    <!-- Category Dropdown -->
+    <div class="dropdown">
+      <a class="dropdown-toggle ml-5" href="#" id="categoryDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Category</a>
+      <div class="dropdown-menu" aria-labelledby="categoryDropdown">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="category" id="fullstack" [(ngModel)]="selectedCategory" value="fullstack">
+          <label class="form-check-label" for="fullstack">Fullstack</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="category" id="cloud" [(ngModel)]="selectedCategory" value="cloud">
+          <label class="form-check-label" for="cloud">Cloud</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="category" id="aiml" [(ngModel)]="selectedCategory" value="aiml">
+          <label class="form-check-label" for="aiml">AI/ML</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level Dropdown -->
+    <div class="dropdown">
+      <a class="dropdown-toggle  ml-5" href="#" id="levelDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Levels</a>
+      <div class="dropdown-menu" aria-labelledby="levelDropdown">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="level" id="beginner" [(ngModel)]="selectedLevel" value="beginner">
+          <label class="form-check-label" for="beginner">Beginner</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="level" id="intermediate" [(ngModel)]="selectedLevel" value="intermediate">
+          <label class="form-check-label" for="intermediate">Intermediate</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="level" id="professional" [(ngModel)]="selectedLevel" value="professional">
+          <label class="form-check-label" for="professional">Professional</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="dropdown">
+        <a class="dropdown-toggle  ml-5" href="#" id="levelDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Instructor</a>
+        <div class="dropdown-menu" aria-labelledby="levelDropdown">
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="instructor" id="beginner" [(ngModel)]="selectedLevel" value="beginner">
+            <label class="form-check-label" for="beginner">Raju</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="instructor" id="intermediate" [(ngModel)]="selectedLevel" value="intermediate">
+            <label class="form-check-label" for="intermediate">Gopi</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="instructor" id="professional" [(ngModel)]="selectedLevel" value="professional">
+            <label class="form-check-label" for="professional">Pavan</label>
+          </div>
+        </div>
+      </div>
+
+    <!-- Apply Filter Button -->
+    <button class="btn btn-primary btn-apply  ml-5" (click)="applyFilter()">Apply Filter</button>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="content">
+    <!-- Main Navbar -->
+    <nav class="navbar navbar-expand-lg background-color:lavender;">
+      <a class="navbar-brand bg-light" href="#">Employee Dashboard</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <button type="button" class="btn btn-outline-info">Certificates</button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="btn btn-info text-white">Assigned Courses</button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="btn btn-info text-white">Progress</button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="btn btn-info text-white">Logout</button>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <input type="text" class="form-control" placeholder="Search by instructor name" id="searchCourse">
+    </div>
+
+    <!-- Dashboard Content -->
+    <h2>Welcome to Your Dashboard</h2>
+    <p>Select filters from the sidebar to see your filtered data.</p>
+
+    <!-- Display Courses -->
+    <div class="row" *ngIf="isVisible">
+      <div class="col-md-3 bg-light" *ngFor="let course of filteredCourses" >
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{ course.title }}</h5>
+            <p class="card-text">{{ course.description }}</p>
+            <p><strong>Category:</strong> {{ course.category }}</p>
+            <p><strong>Level:</strong> {{ course.level }}</p>
+            <p><strong>Instructor:</strong>{{course.instructor}}</p>
+            <button type="button" class=" btn-lg btn-primary">Enroll course</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS & dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+</html>
+
+======================================
+
+
+ enrolled=false;
+  data=false;
+  selectedCategory: string = '';
+  selectedLevel: string = '';
+  selectedInstructor:string='';
+  isVisible: boolean = false;
+
+  userId=0;
+
+  employee:Employee={
+    employeeId: 0,
+    employeeName: '',
+    employeeContact: '',
+    userRef: {
+      userId: 0,
+      password: '',
+      email: '',
+      role: ''
+    }
+  }
+
+  course:Course[]=[{
+    courseId: 0,
+    courseName: "",
+    instructorRef: [
+      {
+        instructorId: 0,
+        instructorName: "",
+        instructorContact: "",
+        userRef: {
+          userId: 0,
+          password: "",
+          email: "",
+          role: ""
+        }
+      }
+    ],
+    moduleList: [
+      {
+        moduleId: 0,
+        moduleName: "",
+        moduleContent: "",
+        materialType: "",
+        materialName: "",
+        quizRef: {
+          quizId: 0,
+          quizName: "",
+          questionsList: [
+            {
+              questionId: 0,
+              questionName: "",
+              option1: "",
+              option2: "",
+              option3: "",
+              option4: "",
+              correctAnswer: "",
+              weightage: 0
+            }
+          ]
+        },
+        vedioRef: [
+          {
+            vedioId: 0,
+            vedioName: "",
+            contentType: "",
+            contentName: ""
+          }
+        ]
+      }
+    ],
+    courseDuration: 0,
+    levelList: [
+      {
+        levelId: 0,
+        levelName: ""
+      }
+    ],
+    category: {
+      categoryId: 0,
+      categoryName: ""
+    }
+  }
+  ]
+  constructor(private courseService:CourseService,private route:ActivatedRoute,private employeeService:EmployeeService,private router:Router){};
+  ngOnInit(): void {
+    this.userId=Number(this.route.snapshot.paramMap.get('userId'));
+    this.employeeService.getEmployeeByUser(this.userId).subscribe((response)=>this.employee=response);
+    console.log(this.userId);
+    this.courseService.getAllcourses().subscribe((course)=>this.course=course);
+    this.data=true;
+  }
+
+  enroll(course:Course): void {
+    console.log(`Enrolled in course with ID: ${course.courseId}`);
+    this.employeeService.CourseAssignedToEmployee(course.courseId, this.employee.employeeId)  // Assuming employeeId is 1, replace with actual employee ID
+      .subscribe(
+        (response) => {
+          if (response) {
+            // Set enrolled to true if successful
+            course.enrolled=true;
+          } else {
+            // Display error message if course is not assignable
+            course.errorMessage = "This course is not assignable to you.";
+          }
+        },
+        (error) => {
+          // Handle any errors
+          console.error('Error enrolling in course', error);
+          course.errorMessage = "Error enrolling in course.";
+        }
+      );
+    
+  }
+
+  startCourse(course: Course): void {
+    // Redirect to the course component to start the course
+    console.log(course.courseId);
+    this.router.navigate(['/course', course.courseId,this.employee.employeeId]);  // Update this route to match your actual route configuration
+  }
+
+======================
+
+<!-- <div class="container mt-4">
+    <div class="row"> -->
+      <!-- Loop through each course and display as a card -->
+      <!-- <div class="col-md-4" *ngFor="let course of course">
+        <div class="card mb-4">
+          <img *ngIf="course.moduleList[0]?.vedioRef[0]?.contentName" 
+               class="card-img-top" 
+               [src]="course.moduleList[0].vedioRef[0].contentName" 
+               alt="Course image">
+          <div class="card-body">
+            <h5 class="card-title">{{ course.courseName }}</h5>
+            <p class="card-text">{{ course.category.categoryName }} - {{ course.courseDuration }} hours</p>
+            <p class="card-text"><strong>Instructor:</strong> {{ course.instructorRef[0].instructorName }}</p>
+            <p class="card-text">{{ course.moduleList[0].moduleName }}</p>
+   -->
+            <!-- Enroll or Start Course button -->
+            <!-- <div *ngIf="!course.enrolled">
+              <button class="btn btn-primary" (click)="enroll(course)">Enroll in Course</button>
+            </div>
+  
+            <div *ngIf="course.enrolled">
+              <button class="btn btn-success" (click)="startCourse(course)">Start Course</button>
+            </div>
+  
+            <div *ngIf="course.errorMessage" class="alert alert-danger mt-2">
+              {{ course.errorMessage }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+   -->
+
+
+==================================
+
+
+<div class="container-fluid">
+    <!-- Full-Screen Sidebar -->
+    <div class="row">
+        <!-- Sidebar (Full Height) -->
+        <div class="col-md-2 bg-dark text-white p-4 vh-100 position-fixed">
+            <h3>Dashboard</h3>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <button class="btn btn-primary w-100 mb-1" (click)="getemployees()">Manage Employees</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-primary w-100 mb-2" (click)="getManagers()">Manage Managers</button>
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-primary w-100 mb-2" (click)="getInstructors()">Manage Instructors</button>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="col-md-10 ms-auto p-4 text-center">
+            <h2>Welcome to the Dashboard</h2>
+
+            <!-- Table Section -->
+            <div *ngIf="fetch">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Employee Id</th>
+                            <th>Employee Name</th>
+                            <th>Employee Contact</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let employee of employees">
+                            <td>{{employee.employeeId}}</td>
+                            <td>{{employee.employeeName}}</td>
+                            <td>{{employee.employeeContact}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div *ngIf="fetchinstructor">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Instructor Id</th>
+                            <th>Instructor Name</th>
+                            <th>Instructor Contact</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let instructor of Instructors">
+                            <td>{{instructor.instructorId}}</td>
+                            <td>{{instructor.instructorName}}</td>
+                            <td>{{instructor.instructorContact}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div *ngIf="fetchmanager">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Manager Id</th>
+                            <th>Manager Name</th>
+                            <th>Manager Contact</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let manager of manager">
+                            <td>{{manager.managerId}}</td>
+                            <td>{{manager.managername}}</td>
+                            <td>{{manager.managerContact}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+=================================
+
+fetch=false;
+  fetchmanager=false;
+  fetchinstructor=false;
+
+  Instructors:Instructor[]=[{
+    instructorId: 0,
+    instructorName: '',
+    instructorContact: '',
+    userRef: {
+      userId: 0,
+      password: '',
+      email: '',
+      role: ''
+    }
+  }
+  ]
+  manager:manager[]=[{
+    managerId: 0,
+    managername: '',
+    managerContact: '',
+    userRef: {
+      userId: 0,
+      password: '',
+      email: '',
+      role: ''
+    }
+  }
+]
+  employees:Employee[]=[
+    {
+      employeeName: "",
+      employeeContact: "",
+      userRef: {
+        userId:0,
+        email: "",
+        password: "",
+        role: ""
+      },
+      employeeId: 0
+    }
+]
+
+  constructor(private service:EmployeeService,private route:Router,private managerService:ManagerService,private instructorService:InstructorService){}
+
+
+  getemployees(){
+    this.service.getAllEmployees().subscribe((employe)=>this.employees=employe);
+    this.fetch=true;
+  }
+
+  getManagers(){
+    this.managerService.getAllManagers().subscribe((managerdta)=>this.manager=managerdta);
+    this.fetchmanager=true;
+  }
+
+  getInstructors(){
+    this.instructorService.getAllInstructor().subscribe((instructordata)=>this.Instructors=instructordata);
+  }
+
+
+  
+
+
+ 

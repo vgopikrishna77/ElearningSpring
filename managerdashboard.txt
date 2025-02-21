@@ -1,0 +1,469 @@
+<div class="sidebar">
+    <h3 class="text-center text-white">Dashboard</h3>
+    <a href="#">Dashboard</a>
+    <button class="btn-assign-courses" onclick="window.location.href='/assign-courses'">Assign Courses</button>
+  </div>
+
+  <div class="main-content">
+    <h2>Welcome to the Dashboard</h2>
+    <p>Here you can manage employees, instructors, and assign courses.</p>
+
+    <div *ngIf="fetch">
+      <div>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Team Id</th>
+              <th>Team Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let team of team">
+              <td>{{team.teamId}}</td>
+              <td>{{team.teamName}}</td>
+              <td><button class="btn btn-info" (click)="viewEmployees(team)">View Employees</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="employeesdata">
+      <table class="table table-bordered"> 
+        <thead>
+          <tr>
+            <th>Employee Id</th>
+            <th>Employee Name</th>
+            <th>Contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let employee of selectedTeam">
+            <td>{{ employee.employeeId }}</td>
+            <td>{{ employee.employeeName }}</td>
+            <td>{{ employee.employeeContact }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="course-list">
+    <h3>Available Courses</h3>
+    <div class="row">
+      <div class="col-md-4" *ngFor="let course of courses">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{{course.courseName}}</h5>
+            <button class="btn btn-primary" (click)="openAssignForm(course)">Assign Course</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Assign Course Form Modal -->
+  <div *ngIf="showAssignForm" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Assign {{selectedCourse?.courseName}}</h5>
+          <button type="button" class="close" (click)="closeAssignForm()">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="submitAssignment()">
+            <!-- Select Team -->
+            <div class="form-group">
+              <label for="teamSelect">Select Team</label>
+              <select id="teamSelect" class="form-control" [(ngModel)]="selectedTeam" name="team" required>
+                <option *ngFor="let team of team" [value]="team.teamId">{{team.teamName}}</option>
+              </select>
+            </div>
+
+            <!-- Select Employee -->
+            <div class="form-group mt-3">
+              <label for="employeeSelect">Select Employee</label>
+              <select id="employeeSelect" class="form-control" [(ngModel)]="selectedEmployee" name="employee" required>
+                <option *ngFor="let employee of selectedTeam?.employeeList" [value]="employee.employeeId">{{employee.employeeName}}</option>
+              </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-success mt-4">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  .sidebar {
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #343a40;
+    color: white;
+    padding-top: 20px;
+  }
+  .sidebar a {
+    color: white;
+    text-decoration: none;
+    padding: 15px 25px;
+    display: block;
+    font-size: 18px;
+    transition: background-color 0.3s;
+  }
+  .sidebar a:hover {
+    background-color: #575757;
+  }
+  .sidebar button {
+    width: 100%;
+    padding: 15px 25px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  .sidebar button:hover {
+    background-color: #0056b3;
+  }
+  .main-content {
+    margin-left: 260px; /* Adds space to the left for the sidebar */
+    padding: 20px;
+  }
+  .table-bordered {
+    margin-top: 20px;
+  }
+  /* For the course cards and buttons */
+.course-list .card {
+    margin-bottom: 20px;
+  }
+  
+  .course-list .card-body {
+    text-align: center;
+  }
+  
+  .course-list button {
+    width: 100%;
+  }
+  
+  .modal .modal-body {
+    padding: 20px;
+  }
+  
+  .modal .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .modal button {
+    width: 100%;
+  }
+  
+
+
+fetch=false;
+  employeesdata=false;
+  selectedCourse: any;
+  selectedTeam: any;
+  selectedEmployee: any;
+  showAssignForm: boolean = false;
+  team:Team[]=[{
+    teamId: 0,
+    teamName: '',
+    employeeList: [{
+      employeeId: 0,
+      employeeName: '',
+      employeeContact: '',
+      userRef: {
+        userId: 0,
+        password: '',
+        email: '',
+        role: ''
+      }
+    }
+    ],
+    managerRef: {
+      managerId: 0,
+      managername: '',
+      managerContact: '',
+      userRef: {
+        userId: 0,
+        password: '',
+        email: '',
+        role: ''
+      }
+    }
+  }
+]
+
+course:Course[]=[{
+    courseId: 0,
+    courseName: "",
+    instructorRef: [
+      {
+        instructorId: 0,
+        instructorName: "",
+        instructorContact: "",
+        userRef: {
+          userId: 0,
+          password: "",
+          email: "",
+          role: ""
+        }
+      }
+    ],
+    moduleList: [
+      {
+        moduleId: 0,
+        moduleName: "",
+        moduleContent: "",
+        materialType: "",
+        materialName: "",
+        quizRef: {
+          quizId: 0,
+          quizName: "",
+          questionsList: [
+            {
+              questionId: 0,
+              questionName: "",
+              option1: "",
+              option2: "",
+              option3: "",
+              option4: "",
+              correctAnswer: "",
+              weightage: 0
+            }
+          ]
+        },
+        vedioRef: [
+          {
+            vedioId: 0,
+            vedioName: "",
+            contentType: "",
+            contentName: ""
+          }
+        ]
+      }
+    ],
+    courseDuration: 0,
+    levelList: [
+      {
+        levelId: 0,
+        levelName: ""
+      }
+    ],
+    category: {
+      categoryId: 0,
+      categoryName: ""
+    }
+  }
+  ]
+  
+
+  constructor(private managerService:ManagerService,private courseService:CourseService,private employeeService:EmployeeService){};
+
+  ngOnInit(): void {
+    const userId=Number(sessionStorage.getItem("userId"));
+    console.log(userId);
+    this.managerService.getTeamsByUser(userId).subscribe((teams)=>
+      {
+        this.team=teams
+        console.log(this.team);
+        this.fetch=true;
+      });
+    this.courseService.getAllcourses().subscribe((course)=>this.course=course);
+  }
+
+  // selectedTeam: Employee[]= [];
+  viewEmployees(team: any) {
+    this.employeeService.getemployeesByTeam(team.teamId).subscribe(
+      (response) => {
+        this.selectedTeam = response; // Set the team data
+        this.employeesdata=true;
+        console.log(this.selectedTeam);
+      },
+      (error) => {
+        console.error('Error fetching team data', error);
+      }
+    );
+  }
+
+  openAssignForm(course: any) {
+    this.selectedCourse = course;
+    this.selectedTeam = null;  // Reset team and employee selection
+    this.selectedEmployee = null;
+    this.showAssignForm = true;
+  }
+  closeAssignForm() {
+    this.showAssignForm = false;
+  }
+
+  submitAssignment() {
+    if (this.selectedTeam && this.selectedEmployee) {
+      const assignmentData = {
+        courseId: this.selectedCourse.courseId,
+        teamId: this.selectedTeam.teamId,
+        employeeId: this.selectedEmployee
+      };
+      
+      // Call your API to submit the assignment data
+      console.log('Assigning course:', assignmentData);
+
+      // After successful submission, you can reset the form or display a success message
+      this.closeAssignForm();
+    }
+  }
+
+
+
+
+
+
+
+
+
+user functionalities:
+===========================
+admin crud operations:
+
+	public List<Admin> getAllAdmins();--rest
+	 public Admin AddAdmi(Admin admin);--rest
+	 public Admin updateAdmin(Admin admin);--rest
+	 public Admin deleteAdminById(int adminId);--rest
+	 public Admin getAdminById(int adminId);--rest
+
+user functionalities:
+--------------------------------
+public User validate(String email,String password);--rest Angular
+
+Employee functionalities:
+-----------------------------------
+		public List<Employee> getAllEmployees();--rest 
+		public Employee addEmployees(Employee employee);--rest
+		public Employee updateEmployee(Employee employee);--rest
+		public Employee deleteEmployee(int EmployeeId);--rest
+		public Employee getEmployeeById(int EmployeeId);--rest
+		public List<Employee> getAllEmployeesByTeam(int TeamId);--rest
+
+
+Instructor functionalities
+---------------------------
+	public List<Instructor> getAllInstructors();--rest
+	 public Instructor AddInstructor(Instructor instrutor);--rest
+	 public Instructor updateInstructor(Instructor instrutor);--rest
+	 public Instructor deleteInstructor(int InstructorID);--rest
+	 public Instructor getInstructorById(int InstructorId);--rest
+	public Course addCourse(Course course);   --rest
+
+
+Manager functionalities
+-----------------------
+
+	public List<Manager> getAllManagers();--rest
+	public Manager addManager(Manager manager);--rest
+	public Manager deleteManager(int managerId);--rest
+	public Manager getManagerById(int managerId);--rest
+	public Manager updateManager(Manager manager);--rest
+	public List<Team> getTeamByManager(int userId);--rest
+	public Integer getManagerId(int userId);--rest
+
+course functionalities:
+----------------------------
+        public Course addCourse(Course course);-rest   Angular
+	public Course deleteCourse(int courseId);--rest
+	public Course updateCourse(Course course);--rest
+	public List<Course> getAllCourses();--rest
+	public Course getCourseById(int courseId);--rest
+	public List<Course> getAllCoursedByCategory(String categoryName);--rest 
+	public List<Course> getAllCoursedByLevel(String levelName);--rest
+	public List<Course> getAllCoursedByInstructor(String instructorName);--rest
+
+category functionalities:
+------------------------
+	public List<Category> getAllCategories();--rest
+	public Category addCategory(Category category);--rest
+	public Category deleteCategory(int categoryId);--rest
+
+-----------------------------------
+Assign functionalities:
+	public Assign assin(Assign assign);--rest
+	public List<Assign> getAll();--rest
+	public int getTeamId(int emloyeeId);--rest
+	public Assign addAssign(int employeeId,int managerId,int courseId);--rest angular
+-------------------
+Enrollment functionalities:
+------------------------------
+	public Enrollment addEnrollment(Enrollment enrollment);--rest
+	public Enrollment getEnrollment(int enrollMentId);--rest
+	public List<Enrollment> getAllEnrollments();--rest
+	public Enrollment deleteEnrollment(int enrollmentId);--rest
+	public Enrollment addEnrollment1(int courseId,int employeeId);--rest
+Feedback functionalities:
+--------------------------
+	public List<Feedback> getAllFeedBacks();--rest
+	public Feedback addFeedback(Feedback feedback);--rest
+	public Feedback deleteFeedbackById(int feedbackId);--rest
+	public Feedback getFeedback(int feeddbackId);--rest
+Level functionalities
+--------------------------
+	public  Level addLevel(Level level);--rest
+	public Level deleteLevelById(int levelId);--rest
+	public List<Level> getLevel();--rest 
+
+Report functionalities
+----------------------
+        public List<Reports> getReports();--rest
+	public Reports addReports(Reports report);--rest
+
+Team functionalities:
+---------------------
+public List<Team> getAllTeams();--rest
+public Team getTeamByTeamId(int teamId);--rest
+public Team addTeam(Team team);--rest
+public Team DeleteTeamById(int id);--rest
+public Team updateTeam(Team team);--rest
+
+Question functionalities:
+------------------------------
+	public List<Questions> getAllQuestions(int QuizId);--rest
+	public Reports addoptions(List<String> ls,int quizId,int employeeId,int courseId);--rest 
+
+Material functionalities
+----------------------
+	Material storeFile(MultipartFile file);--rest angular
+	Material getFileUpload(int id);--rest angular
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

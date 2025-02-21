@@ -1,0 +1,403 @@
+import { Component } from '@angular/core';
+import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Course } from '../Course.class';
+import { CourseService } from '../course.service';
+
+@Component({
+  selector: 'app-course',
+  templateUrl: './course.component.html',
+  styleUrls: ['./course.component.css']
+})
+export class CourseComponent {
+
+  course1:Course={
+    courseId: 0,
+    courseName: "jgjbvb",
+    instructorRef: [
+      {
+        instructorId: 0,
+        instructorName: "dff",
+        instructorContact: "ffds",
+        userRef: {
+          userId: 0,
+          password: "fghf",
+          email: "fghfghh",
+          role: "insrtuctor"
+        }
+      }
+    ],
+    moduleList: [
+      {
+        moduleId: 0,
+        moduleName: "jbmbm",
+        moduleContent: "jkjhkh",
+        materialType: "bnbnbnm",
+        materialName: "bnnbn",
+        quizRef: {
+          quizId: 0,
+          quizName: "bnmbmbm",
+          questionsList: [
+            {
+              questionId: 0,
+              questionName: "jbjb",
+              option1: "bjb",
+              option2: "jbmbm",
+              option3: "mbmb",
+              option4: "mmmbm",
+              correctAnswer: "mbmbm",
+              weightage: 0
+            }
+          ]
+        },
+        vedioRef: [
+          {
+            vedioId: 0,
+            vedioName: "mnmnm",
+            contentType: "mnmnm",
+            contentName: "mnmnm"
+          }
+        ]
+      }
+    ],
+    courseDuration: 0,
+    levelList: [
+      {
+        levelId: 0,
+        levelName: "mnmnm"
+      }
+    ],
+    category: {
+      categoryId: 0,
+      categoryName: "mnmnm"
+    }
+  }
+  courseForm: FormGroup;
+
+  constructor(private c:CourseService){
+    // Initialize the form controls and form group manually
+    this.courseForm = new FormGroup({
+      courseId: new FormControl(this.course1.courseId, Validators.required),
+      courseName: new FormControl(this.course1.courseName, [Validators.required]),
+      courseDuration: new FormControl(this.course1.courseDuration, Validators.required),
+      category: new FormGroup({
+        categoryId: new FormControl(this.course1.category.categoryId, Validators.required),
+        categoryName: new FormControl(this.course1.category.categoryName, [Validators.required]),
+      }),
+      levelList: new FormArray([
+        new FormGroup({
+          levelId: new FormControl(this.course1.levelList[0].levelId, Validators.required),
+          levelName: new FormControl(this.course1.levelList[0].levelName, [Validators.required]),
+        })
+      ]),
+      moduleList: new FormArray([
+        new FormGroup({
+          moduleId: new FormControl(this.course1.moduleList[0].moduleId, Validators.required),
+          moduleName: new FormControl(this.course1.moduleList[0].moduleName, [Validators.required]),
+          moduleContent: new FormControl(this.course1.moduleList[0].moduleContent, Validators.required),
+          materialType: new FormControl(this.course1.moduleList[0].materialType, Validators.required),
+          materialName: new FormControl(this.course1.moduleList[0].materialName, Validators.required),
+          quizRef: new FormGroup({
+            quizId: new FormControl(this.course1.moduleList[0].quizRef.quizId, Validators.required),
+            quizName: new FormControl(this.course1.moduleList[0].quizRef.quizName, Validators.required),
+            questionsList: new FormArray([
+              new FormGroup({
+                questionId: new FormControl(this.course1.moduleList[0].quizRef.questionsList[0].questionId, Validators.required),
+                questionName: new FormControl(this.course1.moduleList[0].quizRef.questionsList[0].questionName, Validators.required),
+                option1: new FormControl(this.course1.moduleList[0].quizRef.questionsList[0].option1, Validators.required),
+                option2: new FormControl(this.course1.moduleList[0].quizRef.questionsList[0].option2, Validators.required),
+                option3: new FormControl(this.course1.moduleList[0].quizRef.questionsList[0].option3, Validators.required),
+                option4: new FormControl(this.course1.moduleList[0].quizRef.questionsList[0].option4, Validators.required),
+                correctAnswer: new FormControl(this.course1.moduleList[0].quizRef.questionsList[0].correctAnswer, Validators.required),
+                weightage: new FormControl(this.course1.moduleList[0].quizRef.questionsList[0].weightage, Validators.required),
+              })
+            ])
+          }),
+          vedioRef: new FormArray([
+            new FormGroup({
+              vedioId: new FormControl(this.course1.moduleList[0].vedioRef[0].vedioId, Validators.required),
+              vedioName: new FormControl(this.course1.moduleList[0].vedioRef[0].vedioName, Validators.required),
+              contentType: new FormControl(this.course1.moduleList[0].vedioRef[0].contentType, Validators.required),
+              contentName: new FormControl(this.course1.moduleList[0].vedioRef[0].contentName, Validators.required),
+            })
+          ])
+        })
+      ])
+    });
+  }
+
+  // Getters to access form controls easily
+  get category() {
+    return this.courseForm.get('category') as FormGroup;
+  }
+
+  get levelList() {
+    return this.courseForm.get('levelList') as FormArray;
+  }
+
+  get moduleList() {
+    return this.courseForm.get('moduleList') as FormArray;
+  }
+
+  get quizRef() {
+    return this.moduleList.controls[0].get('quizRef') as FormGroup;
+  }
+
+  get questionsList() {
+    return this.quizRef.get('questionsList') as FormArray;
+  }
+
+  get vedioRef() {
+    return this.moduleList.controls[0].get('vedioRef') as FormArray;
+  }
+
+  // Method to submit form data
+  onSubmit() {
+    if (this.courseForm.valid) {
+      console.log(this.courseForm.value);
+    } else {
+      console.log("Form is invalid");
+    }
+  }
+
+  // Method to add new module dynamically
+  addModule() {
+    const moduleGroup = new FormGroup({
+      moduleId: new FormControl('', Validators.required),
+      moduleName: new FormControl('', Validators.required),
+      moduleContent: new FormControl('', Validators.required),
+      materialType: new FormControl('', Validators.required),
+      materialName: new FormControl('', Validators.required),
+      quizRef: new FormGroup({
+        quizId: new FormControl('', Validators.required),
+        quizName: new FormControl('', Validators.required),
+        questionsList: new FormArray([
+          new FormGroup({
+            questionId: new FormControl('', Validators.required),
+            questionName: new FormControl('', Validators.required),
+            option1: new FormControl('', Validators.required),
+            option2: new FormControl('', Validators.required),
+            option3: new FormControl('', Validators.required),
+            option4: new FormControl('', Validators.required),
+            correctAnswer: new FormControl('', Validators.required),
+            weightage: new FormControl('', Validators.required),
+          })
+        ])
+      }),
+      vedioRef: new FormArray([
+        new FormGroup({
+          vedioId: new FormControl('', Validators.required),
+          vedioName: new FormControl('', Validators.required),
+          contentType: new FormControl('', Validators.required),
+          contentName: new FormControl('', Validators.required),
+        })
+      ])
+    });
+
+    this.moduleList.push(moduleGroup);
+  }
+
+  // Method to remove a module
+  removeModule(index: number) {
+    this.moduleList.removeAt(index);
+  }
+  addQuestions(){
+    const questions=new FormGroup({
+        questionId: new FormControl('', Validators.required),
+        questionName: new FormControl('', Validators.required),
+        option1: new FormControl('', Validators.required),
+        option2: new FormControl('', Validators.required),
+        option3: new FormControl('', Validators.required),
+        option4: new FormControl('', Validators.required),
+        correctAnswer: new FormControl('', Validators.required),
+        weightage: new FormControl('', Validators.required),
+      });
+    this.questionsList.push(questions);
+
+  }
+  addVideo(){
+     const vedio=new FormGroup([
+      new FormGroup({
+        vedioId: new FormControl('', Validators.required),
+        vedioName: new FormControl('', Validators.required),
+        contentType: new FormControl('', Validators.required),
+        contentName: new FormControl('', Validators.required),
+      })
+    ]);
+    this.vedioRef.push(vedio);
+  }
+  addCourse(): void {
+    const courseData: Course = this.courseForm.value;
+    // Call the addCourse service method with course2 data
+    this.c.addCourse(courseData).subscribe(course => {
+      console.log(courseData);  // Log the response
+    });
+  }
+  courseAdd(){
+    this.c.addCourse(this.course1).subscribe((course) => {
+      this.course1=course;
+      console.log(course);  // Log the response
+    });
+  }
+  
+}
+=====================
+
+
+<form [formGroup]="courseForm" (ngSubmit)="addCourse()">
+    <div class="form-group">
+      <label for="courseId">Course ID</label>
+      <input type="text" id="courseId" formControlName="courseId" class="form-control">
+    </div>
+ 
+    <div class="form-group">
+      <label for="courseName">Course Name</label>
+      <input type="text" id="courseName" formControlName="courseName" class="form-control">
+    </div>
+ 
+    <div class="form-group">
+      <label for="courseDuration">Course Duration</label>
+      <input type="text" id="courseDuration" formControlName="courseDuration" class="form-control">
+    </div>
+ 
+    <!-- Category -->
+    <div formGroupName="category">
+      <div class="form-group">
+        <label for="categoryId">Category ID</label>
+        <input type="text" id="categoryId" formControlName="categoryId" class="form-control">
+      </div>
+ 
+      <div class="form-group">
+        <label for="categoryName">Category Name</label>
+        <input type="text" id="categoryName" formControlName="categoryName" class="form-control">
+      </div>
+    </div>
+ 
+    <!-- Level List -->
+    <div formArrayName="levelList">
+      <div *ngFor="let level of levelList.controls; let i = index" [formGroupName]="i">
+        <div class="form-group">
+          <label for="levelId">Level ID</label>
+          <input type="text" id="levelId" formControlName="levelId" class="form-control">
+        </div>
+ 
+        <div class="form-group">
+          <label for="levelName">Level Name</label>
+          <input type="text" id="levelName" formControlName="levelName" class="form-control">
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Module List -->
+    <div formArrayName="moduleList">
+      <div *ngFor="let module of moduleList.controls; let i = index" [formGroupName]="i">
+        <h3>Module {{i + 1}}</h3>
+        <div class="form-group">
+          <label for="moduleId">Module ID</label>
+          <input type="text" id="moduleId" formControlName="moduleId" class="form-control">
+        </div>
+ 
+        <div class="form-group">
+          <label for="moduleName">Module Name</label>
+          <input type="text" id="moduleName" formControlName="moduleName" class="form-control">
+        </div>
+ 
+        <div class="form-group">
+          <label for="moduleContent">Module Content</label>
+          <textarea id="moduleContent" formControlName="moduleContent" class="form-control"></textarea>
+        </div>
+ 
+        <!-- Quiz Reference -->
+        <div formGroupName="quizRef">
+          <div class="form-group">
+            <label for="quizId">Quiz ID</label>
+            <input type="text" id="quizId" formControlName="quizId" class="form-control">
+          </div>
+ 
+          <div class="form-group">
+            <label for="quizName">Quiz Name</label>
+            <input type="text" id="quizName" formControlName="quizName" class="form-control">
+          </div>
+ 
+          <!-- Questions List -->
+          <div formArrayName="questionsList">
+            <div *ngFor="let question of questionsList.controls; let j = index" [formGroupName]="j">
+              <h4>Question {{j + 1}}</h4>
+              <div class="form-group">
+                <label for="questionId">Question ID</label>
+                <input type="text" id="questionId" formControlName="questionId" class="form-control">
+              </div>
+ 
+              <div class="form-group">
+                <label for="questionName">Question Name</label>
+                <input type="text" id="questionName" formControlName="questionName" class="form-control">
+              </div>
+ 
+              <div class="form-group">
+                <label for="option1">Option 1</label>
+                <input type="text" id="option1" formControlName="option1" class="form-control">
+              </div>
+ 
+              <div class="form-group">
+                <label for="option2">Option 2</label>
+                <input type="text" id="option2" formControlName="option2" class="form-control">
+              </div>
+ 
+              <div class="form-group">
+                <label for="option3">Option 3</label>
+                <input type="text" id="option3" formControlName="option3" class="form-control">
+              </div>
+ 
+              <div class="form-group">
+                <label for="option4">Option 4</label>
+                <input type="text" id="option4" formControlName="option4" class="form-control">
+              </div>
+ 
+              <div class="form-group">
+                <label for="correctAnswer">Correct Answer</label>
+                <input type="text" id="correctAnswer" formControlName="correctAnswer" class="form-control">
+              </div>
+ 
+              <div class="form-group">
+                <label for="weightage">Weightage</label>
+                <input type="number" id="weightage" formControlName="weightage" class="form-control">
+              </div>
+            </div>
+            <button type="button" (click)="addQuestions()">AddQuestion</button>
+          </div>
+         
+        </div>
+ 
+        <!-- Video Reference -->
+        <div formArrayName="vedioRef">
+          <div *ngFor="let vedio of vedioRef.controls; let k = index" [formGroupName]="k">
+            <h4>Video {{k + 1}}</h4>
+            <div class="form-group">
+              <label for="vedioId">Vedio ID</label>
+              <input type="text" id="vedioId" formControlName="vedioId" class="form-control">
+            </div>
+ 
+            <div class="form-group">
+              <label for="vedioName">Vedio Name</label>
+              <input type="text" id="vedioName" formControlName="vedioName" class="form-control">
+            </div>
+ 
+            <div class="form-group">
+              <label for="contentType">Content Type</label>
+              <input type="text" id="contentType" formControlName="contentType" class="form-control">
+            </div>
+ 
+            <div class="form-group">
+              <label for="contentName">Content Name</label>
+              <input type="text" id="contentName" formControlName="contentName" class="form-control">
+            </div>
+          </div>
+          <button type="button" (click)="addVideo()">AddVideo</button>
+        </div>
+      </div>
+      <button type="button" (click)="addModule()">addModule</button>
+    </div>
+ 
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary" >Submit</button>
+  </form>
+<button (click)="courseAdd()">Add coursesss</button>

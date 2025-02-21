@@ -1,0 +1,243 @@
+IcourseService
+==================
+package com.mphasis.eLearning.service;
+
+import java.util.List;
+
+import com.mphasis.eLearning.entity.Course;
+
+public interface ICourseService {
+	public Course addCourse(Course course);
+	public Course deleteCourse(int courseId);
+	public Course updateCourse(Course course);
+	public List<Course> getAllCourses();
+	public Course getCourseById(int courseId);
+
+}
+-------------------------------------
+CourseSeervice
+====================
+package com.mphasis.eLearning.service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.mphasis.eLearning.entity.Course;
+import com.mphasis.eLearning.repository.CourseRepository;
+
+@Service
+public class CourseService implements ICourseService{
+	@Autowired
+	CourseRepository courseRepository;
+
+	@Override
+	public Course addCourse(Course course) {
+		courseRepository.save(course);
+		return course;
+	}
+
+	@Override
+	public Course deleteCourse(int courseId) {
+		Course course=null;
+		if(courseRepository.existsById(courseId)) {
+			course=courseRepository.findById(courseId).get();
+			courseRepository.deleteById(courseId);
+		}
+		return course;
+	}
+
+	@Override
+	public Course updateCourse(Course course) {
+		courseRepository.save(course);
+		return course;
+	}
+
+	@Override
+	public List<Course> getAllCourses() {
+		List<Course> courseList=new ArrayList<>();
+		courseList=courseRepository.findAll();
+		return courseList;
+	}
+
+	@Override
+	public Course getCourseById(int courseId) {
+		Course course=null;
+		if(courseRepository.existsById(courseId)) {
+			course=courseRepository.findById(courseId).get();
+		}
+		return course;
+	}
+
+}
+----------------------------------
+CourseController
+=========================
+package com.mphasis.eLearning.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mphasis.eLearning.entity.Course;
+import com.mphasis.eLearning.service.CourseService;
+
+@RestController
+@RequestMapping("/course")
+public class CourseController {
+	@Autowired
+	CourseService courseService;
+	@PostMapping("addcourse")
+	public ResponseEntity<?> addCourse(@RequestBody Course course) {
+		  Course course1=courseService.addCourse(course);
+		 return new ResponseEntity<>(course1,HttpStatus.OK);
+	}
+	@GetMapping("/getallcourses")
+	public ResponseEntity<?> getAllCourses(){
+		List<Course> courseList=courseService.getAllCourses();
+		if(courseList!=null) {
+			return new ResponseEntity<>(courseList,HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>("No courses are present",HttpStatus.NOT_FOUND);
+		}
+	}
+	@GetMapping("/getcoursebyid/{courseid}")
+	public ResponseEntity<?> getCourseById(@PathVariable("courseid") int courseId){
+		Course course=courseService.getCourseById(courseId);
+		if(course!=null) {
+			return new ResponseEntity<>(course,HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>("Course doesnot found with given courseId",HttpStatus.NOT_FOUND);
+		}
+	}
+	@PutMapping("/updatecourse")
+	public ResponseEntity<?> updateCourse(@RequestBody Course course){
+		Course course1=courseService.updateCourse(course);
+		return new ResponseEntity<>(course1,HttpStatus.OK);
+	}
+	@DeleteMapping("/deletecourse/{courseid}")
+	public ResponseEntity<?> deleteCourseById(@PathVariable("courseid") int courseid){
+		Course course=courseService.deleteCourse(courseid);
+		if(course!=null) {
+			return new ResponseEntity<>(course,HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>("course doesnot found with given courseid ",HttpStatus.NOT_FOUND);
+		}
+	}
+
+}
+----------------------------------------------------------
+IQuestionsService
+=====================
+package com.mphasis.eLearning.service;
+
+import com.mphasis.eLearning.entity.Questions;
+
+public interface IQuestionsService {
+	public Questions  addQuestion(Questions question);
+	public Questions deleteQuestion(int questionId);
+	public Questions updateQuestion(Questions question);
+
+}
+-------------------------------------
+QuetsionsService
+=================================
+package com.mphasis.eLearning.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.mphasis.eLearning.entity.Questions;
+import com.mphasis.eLearning.repository.QuestionsRepository;
+@Service
+public class QuestionsService implements IQuestionsService{
+	@Autowired
+	QuestionsRepository questionsRepository;
+	@Override
+	public Questions addQuestion(Questions question) {
+		questionsRepository.save(question);
+		return question;
+	}
+
+	@Override
+	public Questions deleteQuestion(int questionId) {
+		Questions question=null;
+		if(questionsRepository.existsById(questionId)) {
+			question=questionsRepository.findById(questionId).get();
+			questionsRepository.deleteById(questionId);
+		}
+		return question;
+	}
+
+	@Override
+	public Questions updateQuestion(Questions question) {
+		questionsRepository.save(question);
+		return question;
+	}
+
+}
+-------------------------------------------
+QuestionsController
+============================
+package com.mphasis.eLearning.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mphasis.eLearning.entity.Questions;
+import com.mphasis.eLearning.service.QuestionsService;
+
+@RestController
+@RequestMapping("/questions")
+public class QuestionsController {
+	@Autowired
+	QuestionsService questionsService;
+	@PostMapping("/addquestion")
+	public ResponseEntity<?> addQuestion(@RequestBody Questions question){
+		Questions question1=questionsService.addQuestion(question);
+		return new ResponseEntity<>(question1,HttpStatus.OK);
+	}
+	@PutMapping("/updatequestion")
+	public ResponseEntity<?> updateQuestion(@RequestBody Questions question){
+		Questions question1=questionsService.updateQuestion(question);
+		return new ResponseEntity<>(question1,HttpStatus.OK);
+	}
+	@DeleteMapping("/deletequestion/{questionid}")
+	public ResponseEntity<?> deleteQuestion(@PathVariable("questionid") int questionId){
+		Questions question=questionsService.deleteQuestion(questionId);
+		if(question!=null) {
+			return new ResponseEntity<>(question,HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>("Question not found with givem question id",HttpStatus.NOT_FOUND);
+		}
+	}
+	
+
+}
+
+
